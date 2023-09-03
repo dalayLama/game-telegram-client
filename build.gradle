@@ -47,6 +47,8 @@ subprojects {
             dependency('org.mapstruct:mapstruct:1.5.5.Final')
             dependency('org.mapstruct:mapstruct-processor:1.5.5.Final')
             dependency('org.quizstorage:quiz-generator-dto:1.0-SNAPSHOT')
+            dependency('org.telegram:telegrambots:6.8.0')
+            dependency('com.vdurmont:emoji-java:3.2.0')
         }
     }
 
