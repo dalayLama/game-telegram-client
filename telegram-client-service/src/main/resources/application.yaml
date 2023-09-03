@@ -6,3 +6,8 @@ telegram:
 locale:
   language: en
   country: EN
+
+async:
+  thread-pool-size: 3
+  max-thread-pool-size: 3
+  thread-queue-capacity: 50
