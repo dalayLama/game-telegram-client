@@ -3,7 +3,6 @@ package org.quizstorage.components.telegram.event;
 import lombok.RequiredArgsConstructor;
 import org.quizstorage.components.telegram.UpdateHandler;
 import org.quizstorage.components.telegram.event.events.UpdateEvent;
-import org.quizstorage.components.telegram.event.UpdateEventResolver;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
