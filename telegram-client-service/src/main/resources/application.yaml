@@ -1,0 +1,8 @@
+telegram:
+  bot:
+    username:
+    token:
+
+locale:
+  language: en
+  country: EN

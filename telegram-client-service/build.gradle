@@ -7,6 +7,9 @@ dependencies {
     implementation('org.quizstorage:quiz-generator-dto') {
         changing = true
     }
+    implementation('org.springframework.boot:spring-boot-starter')
+    implementation('org.telegram:telegrambots')
+    implementation 'com.vdurmont:emoji-java'
 
     compileOnly('org.projectlombok:lombok')
 
