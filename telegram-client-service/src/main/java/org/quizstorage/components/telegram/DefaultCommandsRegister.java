@@ -55,7 +55,7 @@ public class DefaultCommandsRegister implements CommandsRegister {
     private BotCommand toBotCommand(Command command) {
         Locale locale = localeProvider.getLocale();
         String description = commandsDescriptions.getMessage(command.getDescriptionCode(), new Object[]{}, locale);
-        return new BotCommand(command.getCommand(), description);
+        return new BotCommand(command.getName(), description);
     }
 
     private void logRegisteredCommands(Collection<? extends BotCommand> botCommands) {

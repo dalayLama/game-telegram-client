@@ -1,17 +1,15 @@
 package org.quizstorage.components.telegram;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
 
-@RequiredArgsConstructor
 @Getter
 public enum Command {
 
-    START("start", "start", false),
-    HELP("help", "help"),
-    NEW_GAME("newgame", "new_game");
+    START("/start", "start", false),
+    HELP("/help", "help"),
+    NEW_GAME("/newgame", "new_game");
 
     private final String command;
 
@@ -20,9 +18,17 @@ public enum Command {
     private final boolean showInMenu;
 
     Command(String command, String descriptionCode) {
-        this.command = command;
+        this(command, descriptionCode, true);
+    }
+
+    Command(String command, String descriptionCode, boolean showInMenu) {
+        this.command = command.startsWith("/") ? command : "/" + command;
         this.descriptionCode = descriptionCode;
-        this.showInMenu = true;
+        this.showInMenu = showInMenu;
+    }
+
+    public String getName() {
+        return getCommand().substring(1);
     }
 
     public boolean is(String command) {
