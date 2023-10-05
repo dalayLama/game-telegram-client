@@ -53,7 +53,7 @@ public class DefaultCommandsRegister implements CommandsRegister {
     }
 
     private BotCommand toBotCommand(Command command) {
-        Locale locale = localeProvider.getLocale();
+        Locale locale = localeProvider.getDefaultLocale();
         String description = commandsDescriptions.getMessage(command.getDescriptionCode(), new Object[]{}, locale);
         return new BotCommand(command.getName(), description);
     }
