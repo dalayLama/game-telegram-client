@@ -4,8 +4,13 @@ import java.util.Locale;
 
 public interface LocaleProvider {
 
-    String getLanguageCode();
+    String getDefaultLanguageCode();
 
-    Locale getLocale();
+    Locale getDefaultLocale();
 
+    Locale getLocaleByLanguageCode(String languageCode);
+
+    Locale getLocaleByUserId(Long userId);
+
+    void updateUserLocale(Long userId, String languageCode);
 }
