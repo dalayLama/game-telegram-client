@@ -7,6 +7,9 @@ locale:
   language: en
   country: EN
 
+format:
+  delimiter: ","
+
 async:
   thread-pool-size: 3
   max-thread-pool-size: 3

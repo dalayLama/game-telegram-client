@@ -1,9 +1,9 @@
-package org.quizstorage.components.telegram.event;
+package org.quizstorage.components.event;
 
-import org.quizstorage.components.telegram.event.events.CallbackQueryEvent;
-import org.quizstorage.components.telegram.event.events.CommandEvent;
-import org.quizstorage.components.telegram.event.events.SimpleMessageEvent;
-import org.quizstorage.components.telegram.event.events.UpdateEvent;
+import org.quizstorage.components.event.events.CallbackQueryEvent;
+import org.quizstorage.components.event.events.CommandEvent;
+import org.quizstorage.components.event.events.UpdateEvent;
+import org.quizstorage.components.event.events.SimpleMessageEvent;
 import org.quizstorage.exceptions.UpdateEventResolvingException;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -22,8 +22,7 @@ public class DefaultUpdateEventResolver implements UpdateEventResolver {
         } else if (update.getCallbackQuery() != null) {
             return new CallbackQueryEvent(source, update);
         }
-        String errorMessage = "Unknown type of event for %s".formatted(update);
-        throw new UpdateEventResolvingException(errorMessage);
+        throw new UpdateEventResolvingException(update);
     }
 
 }

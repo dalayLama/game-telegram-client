@@ -2,7 +2,7 @@ package org.quizstorage.configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.quizstorage.QuizStorageTelegramBot;
-import org.quizstorage.components.telegram.UpdateHandler;
+import org.quizstorage.components.telegram.UserMessageHandler;
 import org.quizstorage.configuration.properties.TelegramBotProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,8 +19,8 @@ public class TelegramConfiguration {
     private final TelegramBotProperties properties;
 
     @Bean
-    public TelegramLongPollingBot telegramLongPollingBot(UpdateHandler updateHandler) {
-        return new QuizStorageTelegramBot(properties.getUsername(), properties.getToken(), updateHandler);
+    public TelegramLongPollingBot telegramLongPollingBot(UserMessageHandler userMessageHandler) {
+        return new QuizStorageTelegramBot(properties.getUsername(), properties.getToken(), userMessageHandler);
     }
 
     @Bean

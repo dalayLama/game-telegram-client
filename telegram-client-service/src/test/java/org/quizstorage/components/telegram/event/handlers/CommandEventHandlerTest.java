@@ -6,9 +6,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quizstorage.components.event.handlers.CommandEventHandler;
 import org.quizstorage.components.telegram.Command;
-import org.quizstorage.components.telegram.event.events.CommandEvent;
-import org.quizstorage.components.telegram.event.handlers.commands.executors.CommandExecutor;
+import org.quizstorage.components.event.events.CommandEvent;
+import org.quizstorage.components.telegram.commands.executors.CommandExecutor;
 import org.quizstorage.exceptions.NotFoundExecutorException;
 import org.telegram.telegrambots.meta.api.objects.Message;
 

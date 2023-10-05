@@ -2,8 +2,8 @@ package org.quizstorage.components.satemachine.handlers;
 
 import org.quizstorage.components.satemachine.QuizUserEvent;
 import org.quizstorage.components.satemachine.QuizUserState;
-import org.quizstorage.components.telegram.event.events.CallbackQueryEvent;
-import org.quizstorage.components.telegram.event.events.SimpleMessageEvent;
+import org.quizstorage.components.event.events.CallbackQueryEvent;
+import org.quizstorage.components.event.events.SimpleMessageEvent;
 import org.springframework.statemachine.StateMachine;
 
 public interface StateHandler {

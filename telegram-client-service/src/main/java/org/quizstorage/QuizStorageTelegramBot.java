@@ -1,7 +1,7 @@
 package org.quizstorage;
 
 import lombok.RequiredArgsConstructor;
-import org.quizstorage.components.telegram.UpdateHandler;
+import org.quizstorage.components.telegram.UserMessageHandler;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -12,7 +12,7 @@ public class QuizStorageTelegramBot extends TelegramLongPollingBot {
 
     private final String botToken;
 
-    private final UpdateHandler updateHandler;
+    private final UserMessageHandler userMessageHandler;
 
     @Override
     public String getBotUsername() {
@@ -26,7 +26,7 @@ public class QuizStorageTelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        updateHandler.handle(update);
+        userMessageHandler.handle(update);
     }
 
 }

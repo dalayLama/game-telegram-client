@@ -1,4 +1,4 @@
-package org.quizstorage.components.telegram.event.events;
+package org.quizstorage.components.event.events;
 
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -17,4 +17,8 @@ public class CommandEvent extends UpdateEvent {
         return getMessage().getText();
     }
 
+    @Override
+    public Long getUserId() {
+        return getUpdate().getMessage().getFrom().getId();
+    }
 }

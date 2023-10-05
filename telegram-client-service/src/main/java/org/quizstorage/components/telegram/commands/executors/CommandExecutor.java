@@ -1,4 +1,4 @@
-package org.quizstorage.components.telegram.event.handlers.executors;
+package org.quizstorage.components.telegram.commands.executors;
 
 import org.quizstorage.components.telegram.Command;
 import org.telegram.telegrambots.meta.api.objects.Message;
