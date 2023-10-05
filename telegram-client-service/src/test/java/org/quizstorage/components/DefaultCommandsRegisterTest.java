@@ -39,7 +39,7 @@ class DefaultCommandsRegisterTest {
     @Test
     void shouldRegisterShownInMenuCommands() {
         Locale expectedLocale = Locale.getDefault();
-        given(localeProvider.getLocale()).willReturn(expectedLocale);
+        given(localeProvider.getDefaultLocale()).willReturn(expectedLocale);
         List<BotCommand> expectedCommands = Arrays.stream(Command.values())
                 .filter(Command::isShowInMenu)
                 .map(b -> {

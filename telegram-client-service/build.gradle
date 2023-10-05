@@ -8,13 +8,18 @@ dependencies {
         changing = true
     }
     implementation('org.springframework.boot:spring-boot-starter')
+    implementation 'org.springframework.statemachine:spring-statemachine-starter'
+    implementation('org.springframework.boot:spring-boot-starter-aop')
+//    implementation('org.springframework.boot:spring-boot-starter-data-redis')
     implementation('org.telegram:telegrambots')
     implementation 'com.vdurmont:emoji-java'
+    implementation("com.google.guava:guava")
 
     compileOnly('org.projectlombok:lombok')
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation 'org.springframework.statemachine:spring-statemachine-test'
     testCompileOnly('org.projectlombok:lombok')
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"

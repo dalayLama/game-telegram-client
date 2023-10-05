@@ -40,13 +40,13 @@ class DefaultTelegramBotFacadeTest {
 
         SetMyCommands expectedCommands = new SetMyCommands(commands, new BotCommandScopeDefault(), languageCode);
 
-        given(localeProvider.getLanguageCode()).willReturn(languageCode);
+        given(localeProvider.getDefaultLanguageCode()).willReturn(languageCode);
         given(bot.execute(expectedCommands)).willReturn(true);
 
         boolean result = botFacade.registerCommands(commands);
 
         assertThat(result).isTrue();
-        then(localeProvider).should(only()).getLanguageCode();
+        then(localeProvider).should(only()).getDefaultLanguageCode();
         then(bot).should(only()).execute(expectedCommands);
     }
 
