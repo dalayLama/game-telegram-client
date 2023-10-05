@@ -1,6 +1,6 @@
 package org.quizstorage.exceptions;
 
-public class TelegramBotException extends QuizTelegramClientException {
+public class TelegramBotException extends RuntimeException {
 
     public TelegramBotException() {
     }
