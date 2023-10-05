@@ -9,9 +9,13 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 public class MessageSourceConfiguration {
 
     @Bean
-    public MessageSource commandsDescriptions() {
+    public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasename("classpath:messages/commands/descriptions");
+        messageSource.setBasenames(
+                "classpath:messages/commands/descriptions",
+                "classpath:messages/errors/errors",
+                "classpath:messages/info/info"
+        );
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
     }
