@@ -4,7 +4,10 @@ plugins {
 
 dependencies {
     implementation('org.mapstruct:mapstruct')
-    implementation('org.quizstorage:quiz-generator-dto') {
+    implementation('org.quizstorage.generator:quiz-generator-dto') {
+        changing = true
+    }
+    implementation('org.quizstorage.director:quiz-director-dto') {
         changing = true
     }
     implementation('org.springframework.boot:spring-boot-starter')
