@@ -5,7 +5,9 @@ import org.quizstorage.generator.dto.InitField;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class InitFieldsContainer {
 
@@ -38,4 +40,11 @@ public class InitFieldsContainer {
     public Optional<InitFieldValueHolder> getCurrentInitFieldValueHolder() {
         return Optional.ofNullable(currentValueHolder);
     }
+
+    public Map<String, Object> toMap() {
+        return valueHolders.stream()
+                .filter(valueHolder -> !valueHolder.isSkipped())
+                .collect(Collectors.toMap(holder -> holder.getInitField().name(), InitFieldValueHolder::getValue));
+    }
+
 }

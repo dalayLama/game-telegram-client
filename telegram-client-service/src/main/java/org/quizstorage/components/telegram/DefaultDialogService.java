@@ -1,6 +1,9 @@
 package org.quizstorage.components.telegram;
 
 import lombok.RequiredArgsConstructor;
+import org.quizstoradge.director.dto.AnswerResult;
+import org.quizstoradge.director.dto.GameQuestionDto;
+import org.quizstoradge.director.dto.GameResult;
 import org.quizstorage.components.common.CoddedMessage;
 import org.quizstorage.components.common.InfoMessage;
 import org.quizstorage.components.common.MessageProvider;
@@ -187,6 +190,42 @@ public class DefaultDialogService implements DialogService {
     @Override
     public void confirmSelectedSource(Long userId, QuizSourceDto source) {
         removeReplyKeyboard(userId, InfoMessage.SOURCE_SELECTED, source.name());
+    }
+
+    @Override
+    public void askQuestion(Long userId, GameQuestionDto question) {
+        BotApiMethod<? extends Serializable> botApiMethod = methodGenerator.questionKeyboard(userId, question);
+        botFacade.execute(botApiMethod);
+    }
+
+    @Override
+    public void gameOver(Long userId, GameResult gameResult) {
+        String message = messageProvider.getLocaledMessageForUser(
+                userId,
+                InfoMessage.GAME_OVER,
+                gameResult.totalQuestions(),
+                gameResult.correctAnswers()
+        );
+        sendMessage(userId, message);
+    }
+
+    @Override
+    public void confirmAnswer(Message message, GameQuestionDto question, AnswerResult result) {
+        Long userId = message.getFrom().getId();
+        String text = messageProvider.getLocaledMessageForUser(userId, InfoMessage.ANSWER_ACCEPTED);
+        removeReplyKeyboard(userId, text);
+    }
+
+    @Override
+    public void confirmAnswer(CallbackQuery callbackQuery, GameQuestionDto question, AnswerResult answer) {
+        editMessage(
+                callbackQuery.getMessage().getChatId(),
+                callbackQuery.getMessage().getMessageId(),
+                callbackQuery.getMessage().getText()
+        );
+        Long userId = callbackQuery.getFrom().getId();
+        String text = messageProvider.getLocaledMessageForUser(userId, InfoMessage.ANSWER_ACCEPTED);
+        sendMessage(userId, text);
     }
 
     private void sendMessage(Long userId, String text) {

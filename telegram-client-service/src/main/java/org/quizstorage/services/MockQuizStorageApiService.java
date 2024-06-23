@@ -37,12 +37,12 @@ public class MockQuizStorageApiService implements QuizStorageApiService {
         return List.of(
                 FieldType.SELECT.createInitField("multiSelect", "Choose a category", false,
                         new SelectFormat(true, List.of(new SelectOption("1", "option1"), new SelectOption("2", "option2")))
-                ),
-                FieldType.SELECT.createInitField("simpleSelect", "Select an option", false,
-                        new SelectFormat(false, List.of(new SelectOption("1", "option1"), new SelectOption("2", "option2")))
-                ),
-                FieldType.NUMBER.createInitField("number1", "fill number", false, new NumberFormat(10, 5)),
-                FieldType.NUMBER.createInitField("number2", "fill number", false, null)
+                )
+//                FieldType.SELECT.createInitField("simpleSelect", "Select an option", false,
+//                        new SelectFormat(false, List.of(new SelectOption("1", "option1"), new SelectOption("2", "option2")))
+//                ),
+//                FieldType.NUMBER.createInitField("number1", "fill number", false, new NumberFormat(10, 5)),
+//                FieldType.NUMBER.createInitField("number2", "fill number", false, null)
         );
     }
 
@@ -96,7 +96,7 @@ public class MockQuizStorageApiService implements QuizStorageApiService {
         return Optional.ofNullable(gameHolder.getCurrentQuestion());
     }
 
-        @Override
+    @Override
     public AnswerResult acceptAnswer(Long userId, String gameId, int questionNumber, Set<String> answers) {
             GameHolder gameHolder = getGameHolder(userId);
             AnswerResult result = gameHolder.closeCurrentQuestion();
@@ -151,37 +151,34 @@ public class MockQuizStorageApiService implements QuizStorageApiService {
 
         private final Queue<GameQuestionDto> questions;
 
-        private final List<AnswerResult> answers;
-
         private GameQuestionDto currentQuestion;
 
         public GameHolder(GameInfo gameInfo, QuestionSet questions) {
             this.gameInfo = gameInfo;
             this.questions = new ArrayDeque<>();
             this.questions.addAll(toGameQuestionDtos(questions.questions()));
-            this.answers = new ArrayList<>(this.questions.size());
             this.currentQuestion = this.questions.poll();
         }
 
         public synchronized AnswerResult closeCurrentQuestion() {
-            if (currentQuestion != null) {
-                int number = currentQuestion.number();
-                currentQuestion = this.questions.poll();
-                AnswerResult result = new AnswerResult(gameInfo, number, currentQuestion);
-                this.answers.add(result);
-                if (currentQuestion == null) {
-                    gameInfo = new GameInfo(
-                            gameInfo.id(),
-                            gameInfo.userId(),
-                            gameInfo.sourceId(),
-                            gameInfo.start(),
-                            Instant.now()
-                    );
-                }
-                return result;
-            } else {
+            if (currentQuestion == null) {
                 throw new GameIsFinishedExcepiton("Game %s is already finished".format(gameInfo.id()));
+
             }
+            int number = currentQuestion.number();
+            currentQuestion = this.questions.poll();
+            AnswerResult result = new AnswerResult(gameInfo, number, currentQuestion);
+            if (currentQuestion == null) {
+                gameInfo = new GameInfo(
+                        gameInfo.id(),
+                        gameInfo.userId(),
+                        gameInfo.sourceId(),
+                        gameInfo.start(),
+                        Instant.now()
+                );
+            }
+
+            return result;
         }
 
         public GameResult getGameResult() {

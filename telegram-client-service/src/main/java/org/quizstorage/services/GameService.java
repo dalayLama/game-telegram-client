@@ -16,4 +16,8 @@ public interface GameService {
     void skipCurrentInitField(CallbackQuery callbackQuery);
 
     void skipCurrentInitField(Message message);
+
+    void acceptAnswer(Message message);
+
+    void acceptAnswers(CallbackQuery callbackQuery);
 }

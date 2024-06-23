@@ -3,15 +3,16 @@ package org.quizstorage.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.quizstoradge.director.dto.AnswerResult;
+import org.quizstoradge.director.dto.GameInfo;
+import org.quizstoradge.director.dto.GameQuestionDto;
+import org.quizstoradge.director.dto.GameResult;
 import org.quizstorage.components.common.initfield.InitFieldValueValidator;
 import org.quizstorage.components.satemachine.QuizStateMachine;
 import org.quizstorage.components.satemachine.QuizStorageStateMachineFacade;
 import org.quizstorage.components.satemachine.QuizUserEvent;
 import org.quizstorage.components.telegram.DialogService;
-import org.quizstorage.exceptions.CurrentInitFieldValueHolderIsAbsent;
-import org.quizstorage.exceptions.NotSelectedOptionException;
-import org.quizstorage.exceptions.RequiredInitFieldException;
-import org.quizstorage.exceptions.SourceNotFoundException;
+import org.quizstorage.exceptions.*;
 import org.quizstorage.generator.dto.*;
 import org.quizstorage.objects.InitFieldValueHolder;
 import org.quizstorage.objects.InitFieldsContainer;
@@ -20,8 +21,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -39,9 +39,7 @@ public class DefaultGameService implements GameService {
     @Override
     public void newGame(Long userId) {
         QuizStateMachine stateMachine = stateMachineFacade.getStateMachine();
-        if (stateMachine.isComplete()) {
-            stateMachine.start();
-        }
+        stateMachine.start();
         List<QuizSourceDto> sourcesList = apiService.getSourcesList();
         stateMachine.setSourcesList(sourcesList);
         stateMachine.sendEvent(QuizUserEvent.SELECT_SOURCE);
@@ -78,7 +76,7 @@ public class DefaultGameService implements GameService {
         stateMachineFacade.save(stateMachine, userId);
         pair.getKey().nextInitField().ifPresentOrElse(
                 nextInitField -> dialogService.askToSetInitField(userId, nextInitField),
-                () -> startGame(userId)
+                () -> startGame(userId, stateMachine)
         );
     }
 
@@ -96,7 +94,7 @@ public class DefaultGameService implements GameService {
         dialogService.confirmInitField(callbackQuery, initFieldValueHolder.getInitField());
         pair.getKey().nextInitField().ifPresentOrElse(
                 nextInitField -> dialogService.askToSetInitField(userId, nextInitField),
-                () -> startGame(userId)
+                () -> startGame(userId, stateMachine)
         );
     }
 
@@ -116,7 +114,7 @@ public class DefaultGameService implements GameService {
         dialogService.confirmSkipping(callbackQuery, initField);
         pair.getKey().nextInitField().ifPresentOrElse(
                 nextInitField -> dialogService.askToSetInitField(userId, nextInitField),
-                () -> startGame(userId)
+                () -> startGame(userId, stateMachine)
         );
     }
 
@@ -136,7 +134,42 @@ public class DefaultGameService implements GameService {
         dialogService.confirmSkipping(message, initField);
         pair.getKey().nextInitField().ifPresentOrElse(
                 nextInitField -> dialogService.askToSetInitField(userId, nextInitField),
-                () -> startGame(userId)
+                () -> startGame(userId, stateMachine)
+        );
+    }
+
+    @Override
+    public void acceptAnswer(Message message) {
+        Long userId = message.getFrom().getId();
+        QuizStateMachine stateMachine = stateMachineFacade.getStateMachine(userId);
+        GameQuestionDto question = getCurrentQuestion(userId, stateMachine)
+                .orElseThrow(CurrentQuestionIsUnknownException::new);
+        AnswerResult result = apiService.acceptAnswer(
+                userId, question.gameInfo().id(), question.number(), Set.of(message.getText()));
+        stateMachine.setCurrentQuestion(result.nextQuestion());
+        stateMachineFacade.save(stateMachine, userId);
+        dialogService.confirmAnswer(message, question, result);
+        Optional.ofNullable(result.nextQuestion()).ifPresentOrElse(
+                nextQuestion -> dialogService.askQuestion(userId, nextQuestion),
+                () -> finishGame(userId, result.gameInfo().id(), stateMachine)
+        );
+    }
+
+    @Override
+    public void acceptAnswers(CallbackQuery callbackQuery) {
+        Long userId = callbackQuery.getFrom().getId();
+        QuizStateMachine stateMachine = stateMachineFacade.getStateMachine(userId);
+        GameQuestionDto question = getCurrentQuestion(userId, stateMachine)
+                .orElseThrow(CurrentQuestionIsUnknownException::new);
+        List<String> values = dialogService.getSelectedValues(callbackQuery.getMessage().getReplyMarkup());
+        AnswerResult answer = apiService.acceptAnswer(
+                userId, question.gameInfo().id(), question.number(), new HashSet<>(values));
+        stateMachine.setCurrentQuestion(answer.nextQuestion());
+        stateMachineFacade.save(stateMachine, userId);
+        dialogService.confirmAnswer(callbackQuery, question, answer);
+        Optional.ofNullable(answer.nextQuestion()).ifPresentOrElse(
+                nextQuestion -> dialogService.askQuestion(userId, nextQuestion),
+                () -> finishGame(userId, answer.gameInfo().id(), stateMachine)
         );
     }
 
@@ -151,17 +184,57 @@ public class DefaultGameService implements GameService {
                           QuizStateMachine stateMachine) {
         List<InitField<?>> fields = apiService.getInitFields(selectedSourceId);
         InitFieldsContainer initFieldsContainer = new InitFieldsContainer(fields);
+        stateMachine.setSourceId(selectedSourceId);
         stateMachine.setInitFieldsContainer(initFieldsContainer);
         stateMachine.sendEvent(QuizUserEvent.FILL_INIT_DATA);
         stateMachineFacade.save(stateMachine, userId);
         initFieldsContainer.nextInitField().ifPresentOrElse(
                 initField -> dialogService.askToSetInitField(userId, initField),
-                () -> startGame(userId)
+                () -> startGame(userId, stateMachine)
         );
     }
 
-    private void startGame(Long userId) {
-        log.info("Start to play a game for user {}", userId);
+    private void startGame(Long userId, QuizStateMachine stateMachine) {
+        String sourceId = stateMachine.getSourceId().orElseThrow(QuizSourceIsNotDeterminedException::new);
+        InitFieldsContainer container = stateMachine.getInitFieldsContainer()
+                .orElseThrow(InitFieldsContainerIsAbsentException::new);
+        Map<String, Object> config = container.toMap();
+        QuestionSet questionSet = apiService.generateQuestionSet(sourceId, config);
+        GameInfo game = apiService.createGame(userId, questionSet);
+        stateMachine.setCurrentGame(game);
+        stateMachine.sendEvent(QuizUserEvent.START_GAME);
+        stateMachineFacade.save(stateMachine, userId);
+        askCurrentQuestion(userId, game.id(), stateMachine);
+    }
+
+    private void askCurrentQuestion(Long userId, String gameId, QuizStateMachine stateMachine) {
+        stateMachine.getCurrentQuestion().or(() -> loadCurrentQuestion(userId, gameId, stateMachine)).ifPresentOrElse(
+                question -> dialogService.askQuestion(userId, question),
+                () -> finishGame(userId, gameId, stateMachine)
+        );
+    }
+
+    private void finishGame(Long userId, String gameId, QuizStateMachine stateMachine) {
+        stateMachine.sendEvent(QuizUserEvent.FINISH_GAME);
+        stateMachineFacade.save(stateMachine, userId);
+        GameResult gameResult = apiService.getGameResult(userId, gameId);
+        dialogService.gameOver(userId, gameResult);
+    }
+
+    private Optional<GameQuestionDto> getCurrentQuestion(Long userId, QuizStateMachine stateMachine) {
+        return stateMachine.getCurrentQuestion().or(() -> {
+            GameInfo gameInfo = stateMachine.getCurrentGame().orElseThrow(CurrentGameIsNotDeterminedException::new);
+            return loadCurrentQuestion(userId, gameInfo.id(), stateMachine);
+        });
+    }
+
+    private Optional<GameQuestionDto> loadCurrentQuestion(Long userId, String gameId, QuizStateMachine stateMachine) {
+        Optional<GameQuestionDto> currentQuestion = apiService.getCurrentQuestion(userId, gameId);
+        currentQuestion.ifPresent(q -> {
+            stateMachine.setCurrentQuestion(q);
+            stateMachineFacade.save(stateMachine, userId);
+        });
+        return currentQuestion;
     }
 
 }

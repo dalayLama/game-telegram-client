@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.quizstoradge.director.dto.GameInfo;
+import org.quizstoradge.director.dto.GameQuestionDto;
 import org.quizstorage.generator.dto.QuizSourceDto;
 import org.quizstorage.objects.InitFieldValueHolder;
 import org.quizstorage.objects.InitFieldsContainer;
@@ -27,6 +29,9 @@ public class QuizStateMachine implements StateMachine<QuizUserState, QuizUserEve
     private static final String SOURCE_LIST_KEY = "sourcesList";
 
     private static final String INIT_FIELDS_KEY = "initFields";
+    private static final String SOURCE_ID_KEY = "sourceId";
+    private static final String CURRENT_GAME_KEY = "currentGame";
+    private static final String CURRENT_QUESTION_KEY = "currentQuestion";
 
     @Getter
     private final StateMachine<QuizUserState, QuizUserEvent> delegate;
@@ -159,4 +164,31 @@ public class QuizStateMachine implements StateMachine<QuizUserState, QuizUserEve
                 .map(valueHolder -> new ImmutablePair<>(container, valueHolder));
     }
 
+    public void setSourceId(String sourceId) {
+        this.delegate.getExtendedState().getVariables().put(SOURCE_ID_KEY, sourceId);
+    }
+
+    public Optional<String> getSourceId() {
+        return Optional.ofNullable(this.delegate.getExtendedState().get(SOURCE_ID_KEY, String.class));
+    }
+
+    public void setCurrentGame(GameInfo game) {
+        this.delegate.getExtendedState().getVariables().put(CURRENT_GAME_KEY, game);
+    }
+
+    public Optional<GameQuestionDto> getCurrentQuestion() {
+        return Optional.ofNullable(this.delegate.getExtendedState().get(CURRENT_QUESTION_KEY, GameQuestionDto.class));
+    }
+
+    public void setCurrentQuestion(GameQuestionDto question) {
+        if (question == null) {
+            this.delegate.getExtendedState().getVariables().remove(CURRENT_QUESTION_KEY);
+        } else {
+            this.delegate.getExtendedState().getVariables().put(CURRENT_QUESTION_KEY, question);
+        }
+    }
+
+    public Optional<GameInfo> getCurrentGame() {
+        return Optional.ofNullable(this.delegate.getExtendedState().get(CURRENT_GAME_KEY, GameInfo.class));
+    }
 }

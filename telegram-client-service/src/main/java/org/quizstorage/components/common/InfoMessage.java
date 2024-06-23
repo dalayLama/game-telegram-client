@@ -13,7 +13,9 @@ public enum InfoMessage implements CoddedMessage {
     FILL_INIT_FIELD("init_field.fill"),
     SELECT_INIT_FIELD("init_field.select"),
     NUMBER_FORMAT("number.format"),
-    INIT_FIELD_SKIPPED("init_field.skipped");
+    INIT_FIELD_SKIPPED("init_field.skipped"),
+    GAME_OVER("game.finished"),
+    ANSWER_ACCEPTED("answer.accepted");
 
 
     private final String[] codes;

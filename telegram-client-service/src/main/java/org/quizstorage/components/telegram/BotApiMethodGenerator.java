@@ -1,5 +1,6 @@
 package org.quizstorage.components.telegram;
 
+import org.quizstoradge.director.dto.GameQuestionDto;
 import org.quizstorage.generator.dto.InitField;
 import org.quizstorage.generator.dto.QuizSourceDto;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -14,4 +15,6 @@ public interface BotApiMethodGenerator {
                                                               Collection<? extends QuizSourceDto> sources);
 
     BotApiMethod<? extends Serializable> selectInitFieldKeyboard(Long userId, InitField<?> initField);
+
+    BotApiMethod<? extends Serializable> questionKeyboard(Long userId, GameQuestionDto question);
 }

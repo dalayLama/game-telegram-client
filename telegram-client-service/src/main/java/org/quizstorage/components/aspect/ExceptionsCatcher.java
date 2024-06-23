@@ -29,7 +29,10 @@ public class ExceptionsCatcher {
 
     @AfterThrowing(value = "annotatedClass() || annotatedMethod()", throwing = "e")
     public void handleException(Throwable e) {
-        log.warn("Caught an exception \"{}\", proceeding", e.getClass().getName());
+        log.warn("Caught an exception \"{}\", cause - \"{}\", proceeding",
+                e.getClass().getName(),
+                Optional.ofNullable(e.getCause()).map(Throwable::getMessage).orElse("null")
+        );
         Long userId = e instanceof UserResolvable ? ((UserResolvable) e).getUserId() : null;
         Optional.ofNullable(userId).ifPresentOrElse(
                 id -> handleForUser(id, e),

@@ -1,5 +1,8 @@
 package org.quizstorage.components.telegram;
 
+import org.quizstoradge.director.dto.AnswerResult;
+import org.quizstoradge.director.dto.GameQuestionDto;
+import org.quizstoradge.director.dto.GameResult;
 import org.quizstorage.components.common.CoddedMessage;
 import org.quizstorage.generator.dto.InitField;
 import org.quizstorage.generator.dto.QuizSourceDto;
@@ -50,4 +53,12 @@ public interface DialogService {
     boolean isSkipping(Message message);
 
     void confirmSkipping(Message message, InitField<?> initField);
+
+    void askQuestion(Long userId, GameQuestionDto question);
+
+    void gameOver(Long userId, GameResult gameResult);
+
+    void confirmAnswer(Message message, GameQuestionDto question, AnswerResult result);
+
+    void confirmAnswer(CallbackQuery callbackQuery, GameQuestionDto question, AnswerResult answer);
 }
